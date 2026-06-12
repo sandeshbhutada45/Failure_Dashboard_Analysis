@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ## Setup
 
 ```bash
