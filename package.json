@@ -1,0 +1,17 @@
+{
+  "name": "pwa-rca",
+  "private": true,
+  "description": "Playwright failure RCA dashboard — Express API + Vite React client",
+  "scripts": {
+    "setup": "npm install --prefix server && npm install --prefix client",
+    "dev": "concurrently -k -n server,client -c blue,magenta \"npm run start --prefix server\" \"npm run dev --prefix client\"",
+    "start": "npm run dev",
+    "server": "npm run start --prefix server",
+    "client": "npm run dev --prefix client",
+    "build:client": "npm run build --prefix client",
+    "start:prod": "node server/server.js"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

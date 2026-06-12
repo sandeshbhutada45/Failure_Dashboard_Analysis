@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: Inter, sans-serif;
+  font-size: 0.875rem; /* 14px — compact dashboard at 100% zoom */
+  line-height: 1.45;
+}

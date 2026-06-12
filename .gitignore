@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+server/node_modules/
+
+# env files (secrets)
+.env
+server/.env
+
+# uploads (generated files)
+server/uploads/
+
+# build files
+dist/
+build/
+
+# logs
+*.log
