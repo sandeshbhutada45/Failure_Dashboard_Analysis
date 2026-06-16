@@ -20,6 +20,50 @@ You are performing ROOT CAUSE classification, not symptom classification.
 
 ---
 
+## EVIDENCE ISOLATION RULE (prevents cross-test leakage)
+
+The user message may contain multiple **FAILED TEST** sections.
+
+You MUST treat each FAILED TEST section as an isolated case.
+
+Do NOT use evidence from other FAILED TEST sections to classify the current one.
+
+If screenshot images are provided, they appear immediately after the corresponding FAILED TEST block.
+Only use those images for that test.
+
+If you cannot prove an alert/banner/popup exists for **this** test from its own screenshot(s) or its own errors/trace, you MUST NOT choose:
+
+Product Defect → Alert Pop In Screenshot
+
+---
+
+## UNIVERSAL REPORTS ADDENDUM (multi-framework, do not remove existing rules)
+
+The FAILED TEST blocks may come from multiple automation frameworks and report formats (not only Playwright), including:
+
+* Playwright (HTML/ZIP/index.html + attachments under data/)
+* Cypress (Mochawesome HTML/JSON, command logs, screenshots, videos)
+* Selenium/TestNG (TestNG HTML/XML, WebDriver exceptions, driver logs)
+* JUnit / NUnit XML (failure/error nodes with stack traces)
+* Allure results (allure-results/*-result.json + attachments)
+* Extent / Spark HTML reports
+* Raw CI console logs (.txt/.log)
+
+IMPORTANT:
+
+1. Apply the SAME category rules regardless of framework.
+2. Treat these labels as generic evidence containers:
+   - "Playwright trace" = any timeline/steps/command log that shows last successful action + first failing action.
+   - "Playwright steps" = any step log (Cypress commands, Allure steps, Selenium actions, etc.).
+   - "Attachments" = any referenced artifacts (screenshots, videos, traces, logs, XML/JSON snippets).
+3. Use the **REPORT FRAMEWORK** line only as context for what evidence might exist; do not let it decide the category.
+4. If evidence is thin (no screenshot + no trace/timeline + only a short error line), prefer:
+   - Uncategorized → Insufficient data
+   unless environment outage is clearly proven.
+5. **Read the full error stack before categorizing (Cypress, Selenium, JUnit, any HTML report with a trace):** When ERRORS includes a multi-line stack (lines starting with "at …", paths such as cypress/support/, webpack:///, specs/, tests/, page objects), read every visible frame—not only the one-line headline. Prefer the **first frame that points at project test/support code** over runner-only frames. If the stack clearly shows a custom wait wrapper (for example cypress/support/index.ts timing out on "application response"), classify from that **wait/assert intent** (Wait/Sync, Assert Logic, or environment slowness) rather than defaulting to Uncategorized → Insufficient data. Do not use Insufficient data when ERRORS already contains a substantive AssertionError message **and** a multi-line stack.
+
+---
+
 ## MANUAL QA ALIGNMENT RULE
 
 The goal is to classify failures the same way an experienced Smart IT PWA manual QA engineer would classify them.
@@ -698,7 +742,7 @@ and that popup prevents workflow progress
 THEN
 
 mainCategory = Product Defect
-subCategory = Random popup/interruption/Dirty Pop Up
+subCategory = Alert Pop In Screenshot
 
 Do not classify as:
 
@@ -796,7 +840,14 @@ Product Defect
 * Assertion 
 * Alert Pop In Screenshot 
 * Element not found 
-* Random popup/interruption/Dirty Pop Up 
+
+IMPORTANT (dedupe):
+
+Treat **all** blocking banners/popups/modals/dirty popups/interruption dialogs as:
+
+Product Defect → **Alert Pop In Screenshot**
+
+Do NOT use a separate popup-specific subCategory.
 
 Automation Script Issue
 

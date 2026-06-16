@@ -642,7 +642,7 @@ return (
 	</h1>
 
 <p className="mt-1 text-xs text-blue-100 sm:text-sm">
-	  AI Powered Playwright Failure Classification Dashboard
+	  AI Powered Failure Classification Dashboard
 	</p>
   </div>
 </div>
@@ -653,11 +653,11 @@ return (
 <div className="bg-white rounded-2xl shadow-lg p-3 mb-4 border border-slate-200">
 <h2 className="text-lg font-bold text-slate-800 mb-3 sm:text-xl">
 
-  Upload Playwright Reports
+  Upload Reports
 </h2>
 
 <p className="text-[11px] text-slate-500 mb-2 sm:text-xs">
-  Bulk select multiple HTML/ZIP reports (up to{" "}
+  Bulk select multiple reports (HTML/ZIP/JSON/XML/TXT/LOG) (up to{" "}
   {MAX_REPORT_FILES} total, up to 5 GB each). Duplicates are skipped.
 </p>
 
@@ -684,7 +684,7 @@ return (
 	  type="file"
 	  hidden
 	  multiple
-	  accept=".html,.htm,.json,.zip,application/json,text/html,application/zip"
+	  accept=".html,.htm,.json,.zip,.xml,.txt,.log,application/json,text/html,application/zip,application/xml,text/plain"
 	  disabled={files.length >= MAX_REPORT_FILES}
 	  onChange={(e) => {
 
