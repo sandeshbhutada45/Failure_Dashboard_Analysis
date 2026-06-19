@@ -2595,6 +2595,10 @@ app.post(
 
       console.log("ANALYZE API HIT")
 
+      let streamMode = false
+
+      let sendLine = null
+
       if (
         !req.files ||
         req.files.length === 0
@@ -3284,9 +3288,24 @@ app.post(
         allFailedTests.length
       )
 
+      const allowEmptyPartial =
+        String(
+          req.query?.partial ||
+            ""
+        ).toLowerCase() === "1" ||
+        String(
+          req.get("x-rca-partial") ||
+            ""
+        ).toLowerCase() === "1"
+
       if (
         allFailedTests.length === 0
       ) {
+
+        if (allowEmptyPartial) {
+
+          return res.json([])
+        }
 
         const names =
           (req.files || [])
@@ -3310,6 +3329,56 @@ app.post(
       const finalResults = []
 
       const BATCH_SIZE = 5
+
+      streamMode =
+        String(
+          req.query?.stream ||
+            ""
+        ).toLowerCase() === "1"
+
+      if (streamMode) {
+
+        res.status(200)
+
+        res.setHeader(
+          "Content-Type",
+          "application/x-ndjson; charset=utf-8"
+        )
+
+        res.setHeader(
+          "Cache-Control",
+          "no-cache, no-transform"
+        )
+
+        res.setHeader(
+          "X-Accel-Buffering",
+          "no"
+        )
+
+        sendLine = (obj) => {
+
+          res.write(
+            JSON.stringify(
+              obj
+            ) + "\n"
+          )
+
+          if (typeof res.flush === "function") {
+
+            res.flush()
+          }
+        }
+
+        if (typeof res.flushHeaders === "function") {
+
+          res.flushHeaders()
+        }
+
+        sendLine({
+          type: "parsed",
+          totalFailed: allFailedTests.length
+        })
+      }
 
       for (
         let i = 0;
@@ -3706,6 +3775,28 @@ if (Array.isArray(parsed)) {
             { depth: null }
           )
         }
+
+        if (
+          streamMode &&
+          typeof sendLine ===
+            "function"
+        ) {
+
+          const processed = Math.min(
+            i + BATCH_SIZE,
+            allFailedTests.length
+          )
+
+          sendLine({
+            type: "progress",
+            processed,
+            totalFailed: allFailedTests.length,
+            pending:
+              allFailedTests.length -
+              processed,
+            classified: finalResults.length
+          })
+        }
       }
 
       if (
@@ -3713,10 +3804,40 @@ if (Array.isArray(parsed)) {
         allFailedTests.length > 0
       ) {
 
+        const msg =
+          "The model returned no usable JSON for any batch. Check the server terminal (LLM_API_ERROR / JSON PARSE ERROR) and HELIXGPT_API_URL / HELIXGPT_API_KEY in server/.env."
+
+        if (
+          streamMode &&
+          typeof sendLine ===
+            "function"
+        ) {
+
+          sendLine({
+            type: "error",
+            error: msg
+          })
+
+          return res.end()
+        }
+
         return res.status(503).json({
-          error:
-            "The model returned no usable JSON for any batch. Check the server terminal (LLM_API_ERROR / JSON PARSE ERROR) and HELIXGPT_API_URL / HELIXGPT_API_KEY in server/.env."
+          error: msg
         })
+      }
+
+      if (
+        streamMode &&
+        typeof sendLine ===
+          "function"
+      ) {
+
+        sendLine({
+          type: "done",
+          results: finalResults
+        })
+
+        return res.end()
       }
 
       res.json(finalResults)
@@ -3732,12 +3853,38 @@ if (Array.isArray(parsed)) {
         error.message
       )
 
-      res.status(500).json({
+      if (
+        streamMode &&
+        typeof sendLine ===
+          "function" &&
+        res.headersSent
+      ) {
 
-        error:
-          error.response?.data ||
-          error.message
-      })
+        try {
+
+          sendLine({
+            type: "error",
+            error: String(
+              error?.message ||
+                error
+            )
+          })
+        } catch (_) {}
+
+        res.end()
+
+        return
+      }
+
+      if (!res.headersSent) {
+
+        res.status(500).json({
+
+          error:
+            error.response?.data ||
+            error.message
+        })
+      }
     }
   }
 )

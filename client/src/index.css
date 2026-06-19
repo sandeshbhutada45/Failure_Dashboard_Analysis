@@ -2,9 +2,188 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: Inter, sans-serif;
-  font-size: 0.875rem; /* 14px — compact dashboard at 100% zoom */
-  line-height: 1.45;
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      "Helvetica Neue",
+      Arial,
+      sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    background-color: #f1f5f9;
+    color: #0f172a;
+  }
+}
+
+/* Bold mesh + scan vibe for empty / loading “deck” */
+.rca-workspace-khatarnak {
+  background-color: #fafafa;
+  background-image:
+    radial-gradient(
+      ellipse 120% 80% at 20% 0%,
+      rgba(139, 92, 246, 0.12),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 100% 70% at 100% 30%,
+      rgba(236, 72, 153, 0.1),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 80% 60% at 50% 100%,
+      rgba(6, 182, 212, 0.1),
+      transparent 45%
+    ),
+    linear-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+  background-size:
+    auto,
+    auto,
+    auto,
+    28px 28px,
+    28px 28px;
+}
+
+@keyframes rca-deck-shift {
+  0%,
+  100% {
+    opacity: 1;
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    opacity: 0.94;
+    filter: hue-rotate(10deg);
+  }
+}
+
+.rca-deck-anim {
+  animation: rca-deck-shift 14s ease-in-out infinite;
+}
+
+@keyframes rca-border-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(139, 92, 246, 0.35),
+      0 0 36px -10px rgba(59, 130, 246, 0.25);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(34, 211, 238, 0.35),
+      0 0 40px -8px rgba(139, 92, 246, 0.35);
+  }
+}
+
+.rca-frame-pulse {
+  animation: rca-border-pulse 5s ease-in-out infinite;
+}
+
+@keyframes rca-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.rca-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(6, 182, 212, 0.14) 0%,
+    rgba(167, 139, 250, 0.38) 45%,
+    rgba(6, 182, 212, 0.14) 90%
+  );
+  background-size: 200% 100%;
+  animation: rca-shimmer 1.35s ease-in-out infinite;
+}
+
+/* Deck hero — aurora wash + orbit + float */
+@keyframes rca-aurora-move {
+  0%,
+  100% {
+    background-position: 0% 40%;
+  }
+  50% {
+    background-position: 100% 60%;
+  }
+}
+
+.rca-deck-aurora {
+  background: linear-gradient(
+    125deg,
+    rgba(34, 211, 238, 0.16),
+    rgba(167, 139, 250, 0.22),
+    rgba(99, 102, 241, 0.14),
+    rgba(34, 211, 238, 0.14)
+  );
+  background-size: 400% 400%;
+  animation: rca-aurora-move 10s ease-in-out infinite;
+}
+
+@keyframes rca-orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rca-orbit-slow {
+  animation: rca-orbit-spin 32s linear infinite;
+}
+
+.rca-orbit-reverse {
+  animation: rca-orbit-spin 48s linear infinite reverse;
+}
+
+@keyframes rca-float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.rca-float-soft {
+  animation: rca-float-soft 4.5s ease-in-out infinite;
+}
+
+@keyframes rca-hero-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(34, 211, 238, 0.35));
+  }
+}
+
+.rca-hero-glow {
+  animation: rca-hero-glow 4s ease-in-out infinite;
+}
+
+.rca-scanlines {
+  background: repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent 3px,
+    rgba(148, 163, 184, 0.08) 3px,
+    rgba(148, 163, 184, 0.08) 4px
+  );
+  opacity: 0.35;
 }
