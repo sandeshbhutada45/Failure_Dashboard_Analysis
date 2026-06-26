@@ -770,9 +770,21 @@ function extractTestNgInlineDataScreenshots(htmlSlice) {
   return out
 }
 
+const TESTNG_CONFIGURATION_METHODS = new Set([
+  "afterMethod",
+  "beforeMethod",
+  "afterClass",
+  "beforeClass",
+  "afterSuite",
+  "beforeSuite",
+  "afterTest",
+  "beforeTest"
+])
+
 /**
  * Anchor ids (#m8, #m45, …) from the emailable **summary** table only: links that
- * appear under a "… — failed" / "… - failed" subsection (not retried / passed).
+ * appear under a "… — failed" / "… - failed" subsection (not retried / passed /
+ * configuration methods such as afterMethod).
  * Matches the report's **# Failed** rows the user clicks to open detail.
  */
 function collectTestNgSummaryFailedAnchorIds(html) {
@@ -798,7 +810,7 @@ function collectTestNgSummaryFailedAnchorIds(html) {
   const summary = summaryMatch[1]
 
   const subsectionRe =
-    /<tr>\s*<th[^>]*colspan[^>]*>[\s\S]*?(?:—|&#8212;|&mdash;|-)\s*failed[\s\S]*?<\/th>\s*<\/tr>([\s\S]*?)(?=<tr>\s*<th[^>]*colspan|<\/tbody>)/gi
+    /<tr>\s*<th[^>]*colspan[^>]*>[\s\S]*?(?:—|&#8212;|&mdash;|-)\s*failed\s*<\/th>\s*<\/tr>([\s\S]*?)(?=<tr>\s*<th[^>]*colspan|<\/tbody>)/gi
 
   let sm
 
@@ -831,7 +843,7 @@ function extractTestNgEmailableDetailBlocks(html) {
   }
 
   const hasEmailableShape =
-    /<title>\s*TestNG\s+Report\s*<\/title>/i.test(html) ||
+    /<title>\s*(?:Consolidated\s+)?TestNG\s+Report/i.test(html) ||
     (
       /<table[^>]*\bid=['"]summary['"][^>]*>/i.test(html) &&
       /class=['"](?:failed|failedeven|failedodd|retried)/i.test(html)
@@ -895,6 +907,14 @@ function extractTestNgEmailableDetailBlocks(html) {
     const testName =
       methodOnly ||
       baseName
+
+    if (
+      TESTNG_CONFIGURATION_METHODS.has(
+        methodOnly
+      )
+    ) {
+      continue
+    }
 
     if (
       failedOnlyAnchors.size >
